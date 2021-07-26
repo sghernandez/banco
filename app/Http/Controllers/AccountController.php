@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
     
 use App\Models\User;
 use App\Models\Account;
+use App\Util\Util;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
     
@@ -21,7 +22,7 @@ class AccountController extends Controller
     /* index: retorna el listado de cuentas; si no es super-admin solo le permite ver las propias */
     public function index()
     {        
-        $Util = new \App\Util\Util;  
+        $Util = new Util;  
 
         if($Util::userHasRole('super-admin')) {             
             $accounts = Account::latest()->paginate(5);  
@@ -66,7 +67,7 @@ class AccountController extends Controller
     /* vista para el formulario de nueva cuenta */
     public function create()
     {
-        return view('accounts.form_account', ['users' => \App\Util\Util::getUsers()]);
+        return view('accounts.form_account', ['users' => Util::getUsers()]);
     }
     
 
@@ -94,7 +95,7 @@ class AccountController extends Controller
         $user = $account->user;
         $users[$account->user_id] = $user->name.' '. $user->lastaname. ' / '. $user->document; 
       
-        $totals = \App\Util\Util::getSaldos([$account]);
+        $totals = Util::getSaldos([$account]);
         $saldo = isset($totals[$account->id]) ? $totals[$account->id] : 0;
         $acciones = \Config::get('app.transactions_type');
         unset($acciones[$this->ingreso_transf], $acciones[$this->salia_transf]);
@@ -116,7 +117,7 @@ class AccountController extends Controller
         }    
         
         if($request->input('action') == $this->salida_caja) {
-           $boolean = \App\Util\Util::validaDescuento($account->id, $request->input('amount'));          
+           $boolean = Util::validaDescuento($account->id, $request->input('amount'));          
         }
 
         $this->setRules($request, $account->id, $boolean);
@@ -165,7 +166,7 @@ class AccountController extends Controller
         $user = User::find(auth()->user()->id);
         $accounts[null] = 'Seleccione una Cuenta';
         $acc = $user->accounts;
-        $totals = \App\Util\Util::getSaldos($acc);
+        $totals = Util::getSaldos($acc);
 
         foreach($acc as $r){ $r->status ? $accounts[$r->id] = $r->number. ' / Saldo: '. (isset($totals[$r->id]) ? $totals[$r->id] : 0) : ''; }                          
 
@@ -179,7 +180,7 @@ class AccountController extends Controller
         $user = User::find(auth()->user()->id);        
         $acc = $user->accounts;
 
-        $totals = \App\Util\Util::getSaldos($acc);
+        $totals = Util::getSaldos($acc);
         $acc_terceros = $this->cuentasTerceros();        
 
         $accounts[null] = 'Seleccione una Cuenta';
@@ -208,7 +209,7 @@ class AccountController extends Controller
             'valor' => 'required|numeric'
         ];        
 
-       $descuento_valido = $descuento_valido ? \App\Util\Util::validaDescuento($origen, $valor) : FALSE;
+       $descuento_valido = $descuento_valido ? Util::validaDescuento($origen, $valor) : FALSE;
        if(! $descuento_valido){ $rules['saldo'] = 'required'; }
 
        $request->validate($rules, $messages);
@@ -253,14 +254,14 @@ class AccountController extends Controller
         if(! $amount) { return; }
         DB::beginTransaction();  
           
-          $id_tran = \App\Util\Util::makeTransaction();  
+          $id_tran = Util::makeTransaction();  
 
-          $result = \App\Util\Util::setMovimiento($origen, $amount, $this->salia_transf, $id_tran);  
+          $result = Util::setMovimiento($origen, $amount, $this->salia_transf, $id_tran);  
           if($result){
-            $result = \App\Util\Util::setMovimiento($destino, $amount, $this->ingreso_transf, $id_tran);
+            $result = Util::setMovimiento($destino, $amount, $this->ingreso_transf, $id_tran);
           }
 
-          \App\Util\Util::finalizaTran($result, $origen);
+          Util::finalizaTran($result, $origen);
 
           return $id_tran;
     }    
@@ -272,10 +273,10 @@ class AccountController extends Controller
         if(! $amount) { return; }
         DB::beginTransaction();  
 
-          $id_tran = \App\Util\Util::makeTransaction();                
-          $result = \App\Util\Util::setMovimiento($id_account, $amount, $type, $id_tran);
+          $id_tran = Util::makeTransaction();                
+          $result = Util::setMovimiento($id_account, $amount, $type, $id_tran);
 
-          \App\Util\Util::finalizaTran($result, $id_account);
+          Util::finalizaTran($result, $id_account);
 
           return $id_tran;
     }    
@@ -304,20 +305,20 @@ class AccountController extends Controller
         }
 
         $rs_accounts = $query->where('user_id', '!=', auth()->user()->id)->where('status', 1)->paginate();
-        $rs_totals = \App\Util\Util::getSaldos($rs_accounts, TRUE);   
+        $rs_totals = Util::getSaldos($rs_accounts, TRUE);   
 
         # $totals = $rs_totals['totals'];
         $owners = $rs_totals['ids_users'];
 
-        foreach(User::all() as $u){
+        foreach(User::all() as $u) {
             $ownAc[$u->id] = " | $u->name $u->lastname, Doc. $u->document";
         }
 
        $accounts[null] = 'Seleccione una Cuenta';
 
-       foreach($rs_accounts as $r){
-            // $accounts[$r->id] = ($r->number. ' / Saldo: '. (isset($totals[$r->id]) ? $totals[$r->id] : 0)). $ownAc[$owners[$r->id]]; 
-            
+       foreach($rs_accounts as $r)
+       {
+            // $accounts[$r->id] = ($r->number. ' / Saldo: '. (isset($totals[$r->id]) ? $totals[$r->id] : 0)). $ownAc[$owners[$r->id]];             
             if($matricular){
                 $accounts[$r->id. '-'. $owners[$r->id]] = 'Cta. No.'. $r->number. $ownAc[$owners[$r->id]]; 
             }

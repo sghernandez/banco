@@ -41,7 +41,7 @@
     <tr class="{{ ${$r->id} }}">
         <td>{{ $r->id }}</td>
         <td>{{ $r->number }}</td>
-        <td>{{ "$r->name $r->lastname"}}</td>
+        <td>{{ "$r->name $r->lastname" }}</td>
         <td>{{ $r->document }}</td>
         <td>{{ $tipos[$r->type] }}</td>
         <td>{{ $tran_origen[$r->type] }}</td>
@@ -50,7 +50,6 @@
     </tr>
     @endforeach
 </table>
-
 
 {!! $transactions->render() !!}
 @endsection
