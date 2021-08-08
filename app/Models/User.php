@@ -52,7 +52,6 @@ class User extends Authenticatable
         /*
           return $this->hasMany(App\Models\Account::class);
           return DB::table('accounts')->where('user_id', $this->id)->get();
-      */
-      
+      */      
     }      
 }

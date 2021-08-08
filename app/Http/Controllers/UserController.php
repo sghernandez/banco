@@ -45,7 +45,9 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
+            'lastname' => 'required',
             'name' => 'required',
+            'document' => 'required|unique:users,document',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|same:confirm-password',
             'roles' => 'required'
@@ -101,8 +103,10 @@ class UserController extends Controller
         if($id == 1) { redirect('/'); }
     
         $this->validate($request, [
+            'lastname' => 'required',
             'name' => 'required',
-            'email' => 'required|email|unique:users,email,'. $id,
+            'email' => 'required|email|unique:users,email,'. $id,            
+            'document' => 'required|unique:users,document,'. $id,            
             'password' => 'same:confirm-password',
             'roles' => 'required'
         ]);

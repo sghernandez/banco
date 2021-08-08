@@ -40,30 +40,39 @@ class AccountController extends Controller
 
     }
 
-
+    
     /* index: retorna el listado de cuentas; si no es super-admin solo le permite ver las propias */
     public function listar_transferencias(Request $request)
     {        
+        $data = $request->all();
+        $type = $request->input('type');
+        $operador = $type ? '=' : '!=';
+        $selects = 'users.document, name, lastname, registered_by, t.created_at, amount, type, number, t.id';        
+
         $transactions = DB::table('transactions AS t')
             ->selectRaw('users.document, name, lastname, registered_by, t.created_at, amount, type, number, t.id')
             ->join('ac_transactions AS ac_t', 'ac_t.transaction_id', '=', 't.id')
             ->join('accounts', 'accounts.id', '=', 'ac_t.account_id')
             ->join('users', 'accounts.user_id', '=', 'users.id')
-            ->where('accounts.user_id', auth()->user()->id)
-            ->orWhere('t.id', function ($query) {
-                $query->select('transaction_id')
-                    ->from('ac_transactions')
-                    ->whereRaw('ac_transactions.transaction_id = t.id')
-                    ->whereRaw('ac_transactions.id != ac_t.id')
-                    ->limit(1);
-            })
-            ->orderBy('created_at', 'DESC')->paginate(5);  
+            ->where('type', $operador, $type)
+            ->where(function ($query) {
+                $query->where('accounts.user_id', auth()->user()->id)
+                ->orWhere('t.id', function ($subQuery) {
+                    $subQuery->select('transaction_id')
+                        ->from('ac_transactions')
+                        ->whereRaw('ac_transactions.transaction_id = t.id')
+                        ->whereRaw('ac_transactions.id != ac_t.id')
+                        ->limit(1);
 
-        return view('accounts.transactions', compact('transactions'))
-             ->with('i', (request()->input('page', 1) - 1) * 5);             
-    }    
-    
+                });
+            })            
+            ->orderBy('created_at', 'DESC')->paginate(5);    
 
+            return view('accounts.transactions', compact('transactions', 'data'))
+            ->with('i', (request()->input('page', 1) - 1) * 5);             
+    }     
+
+ 
     /* vista para el formulario de nueva cuenta */
     public function create()
     {
@@ -152,8 +161,7 @@ class AccountController extends Controller
                 'account_id' => $in[0]
             ];
 
-            DB::table('cuentas_matriculadas')->where($data)->delete(); 
-            DB::table('cuentas_matriculadas')->insert($data);     
+            DB::table('cuentas_matriculadas')->updateOrInsert($data, $data);               
             
             return redirect('matricular-cuenta')->with('success', 'Cuenta Matriculada con éxito.');
         }

@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\MyAuthController;
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\CompanyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,15 +37,18 @@ Route::post('forget-password', [ForgotPasswordController::class, 'postEmail']);
 Route::get('reset-password/{token}', [ResetPasswordController::class, 'getPassword']);
 Route::post('reset-password', [ResetPasswordController::class, 'updatePassword']);
 
+Route::resource('companies', CompanyController::class);
+Route::get('companies', [CompanyController::class, 'index'])->name('companies');
+
 
 /* solo super-admin puede administrar roles y usuarios */
-   Route::group(['middleware' => ['role:super-admin']], function () {
+Route::group(['middleware' => ['role:super-admin']], function () {
     Route::resource('accounts', AccountController::class);
     Route::resource('users', UserController::class);
     Route::resource('roles', RoleController::class);    
 });
 
- 
+
 Route::group(['middleware' => ['role:super-admin|bank-user']], function () {
   
     Route::get('accounts', [AccountController::class, 'index'])->name('accounts');

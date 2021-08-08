@@ -18,8 +18,22 @@
 <?php 
     $j = 1;
     $tipos = Config::get('app.transactions_type');
-    $tran_origen = Config::get('app.tran_origen') ?>
+    $options[null] = 'Seleccione una Opción';
+    $tran_origen = Config::get('app.tran_origen'); 
+
+    foreach ($tran_origen as $key => $o) { $options[$key] = $o; } ?>
 <br>
+    
+{!! Form::open(array('route' => 'listar_transferencias', 'method' => 'POST')) !!}
+    @csrf
+    <!-- State -->
+    <h6><b>Destino / Origen</b></h6>
+    <a href="{{ url('listar-transferencias') }}" class="btn btn-warning">Recargar</a>
+      {!! Form::select('type', $options, (isset($data['type']) ? $data['type'] : null), array('class' => 'form-control col-sm-6', 'required' => 'required', 'style' => 'display: inline')) !!}                             
+
+    <!-- Send button -->
+    <button type=submit class="btn btn-primary">Buscar</button>    
+{!! Form::close() !!} <br>  
 
 <table class="table table-striped">
   <tr>
@@ -33,15 +47,13 @@
      <th>Fecha Movimiento</th>
   </tr>
     @foreach ($transactions as $key => $r) 
-   
-      <?php if(isset(${$r->id})){ $j--; }
-            ${$r->id} = ($j % 2 == 1) ? 'bg-info text-white' : 'bg-light text-dark';
-            $j++ ?>
-
+    <?php  if(isset(${$r->id})){ $j--; }
+           ${$r->id} = ($j % 2 == 1) ? 'bg-info text-white' : 'bg-light text-dark';
+           $j++ ?>
     <tr class="{{ ${$r->id} }}">
         <td>{{ $r->id }}</td>
         <td>{{ $r->number }}</td>
-        <td>{{ "$r->name $r->lastname" }}</td>
+        <td>{{ "$r->name $r->lastname"}}</td>
         <td>{{ $r->document }}</td>
         <td>{{ $tipos[$r->type] }}</td>
         <td>{{ $tran_origen[$r->type] }}</td>
@@ -51,5 +63,6 @@
     @endforeach
 </table>
 
-{!! $transactions->render() !!}
+
+{{ $transactions->appends($data)->links() }}
 @endsection

@@ -26,13 +26,25 @@
     <div class="col-xs-12 col-sm-12 col-md-12">
         <div class="form-group">
             <strong>Nombre:</strong>
-            {!! Form::text('name', null, array('placeholder' => 'Nombre','class' => 'form-control')) !!}
+            {!! Form::text('name', null, array('placeholder' => 'Nombre','class' => 'form-control', 'required' => 'required')) !!}
         </div>
     </div>
     <div class="col-xs-12 col-sm-12 col-md-12">
         <div class="form-group">
+            <strong>Apellidos:</strong>
+            {!! Form::text('lastname', null, array('placeholder' => 'Apellidos','class' => 'form-control', 'required' => 'required')) !!}
+        </div>
+    </div>
+    <div class="col-xs-12 col-sm-12 col-md-12">
+        <div class="form-group">
+            <strong>No. Documento:</strong>
+            {!! Form::number('document', null, array('placeholder' => 'No. Documento','class' => 'form-control', 'required' => 'required')) !!}
+        </div>
+    </div>    
+    <div class="col-xs-12 col-sm-12 col-md-12">
+        <div class="form-group">
             <strong>Email:</strong>
-            {!! Form::text('email', null, array('placeholder' => 'Email','class' => 'form-control')) !!}
+            {!! Form::text('email', null, array('placeholder' => 'Email','class' => 'form-control', 'required' => 'required')) !!}
         </div>
     </div>
     <div class="col-xs-12 col-sm-12 col-md-12">
