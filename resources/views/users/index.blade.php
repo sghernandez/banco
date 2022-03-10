@@ -20,7 +20,7 @@
 
 <table class="table table-striped">
  <tr>
-   <th>No.</th>
+   <th>ID</th>
    <th>Nombre</th>
    <th>Apellidos</th>
    <th>Documento</th>
@@ -35,7 +35,7 @@
  </tr>
  @foreach ($data as $key => $user)
   <tr>
-    <td>{{ ++$i }}</td>
+    <td>{{ $user->id }}</td>
     <td>{{ $user->name }}</td>
     <td>{{ $user->lastname }}</td>
     <td>{{ $user->document }}</td>
