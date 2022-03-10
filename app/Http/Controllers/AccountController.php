@@ -35,8 +35,7 @@ class AccountController extends Controller
 
         $totals = $Util::getSaldos($accounts);
 
-        return view('accounts.'. $view, compact('accounts', 'totals'))
-                 ->with('i', (request()->input('page', 1) - 1) * 5);      
+        return view('accounts.'. $view, compact('accounts', 'totals'));      
 
     }
 
@@ -63,13 +62,11 @@ class AccountController extends Controller
                         ->whereRaw('ac_transactions.transaction_id = t.id')
                         ->whereRaw('ac_transactions.id != ac_t.id')
                         ->limit(1);
-
                 });
             })            
             ->orderBy('created_at', 'DESC')->paginate(5);    
 
-            return view('accounts.transactions', compact('transactions', 'data'))
-            ->with('i', (request()->input('page', 1) - 1) * 5);             
+            return view('accounts.transactions', compact('transactions', 'data'));             
     }     
 
  
